@@ -24,7 +24,7 @@ public final class Configs {
   private static final double nominalVoltage = 12.0;
 
   public static final class MAXSwerveModule {
-    public static final SparkMaxConfig drivingConfig = new SparkMaxConfig();
+    public static final SparkFlexConfig drivingConfig = new SparkFlexConfig();
     public static final SparkMaxConfig turningConfig = new SparkMaxConfig();
 
     static {
@@ -83,7 +83,7 @@ public final class Configs {
 
   public static final class IntakeSubsystem {
     public static final SparkFlexConfig intakeConfig = new SparkFlexConfig();
-    public static final SparkFlexConfig conveyorConfig = new SparkFlexConfig();
+    public static final SparkMaxConfig conveyorConfig = new SparkMaxConfig();
 
     static {
       // Configure basic settings of the intake motor
@@ -105,7 +105,7 @@ public final class Configs {
   public static final class ShooterSubsystem {
     public static final SparkFlexConfig flywheelConfig = new SparkFlexConfig();
     public static final SparkFlexConfig flywheelFollowerConfig = new SparkFlexConfig();
-    public static final SparkFlexConfig feederConfig = new SparkFlexConfig();
+    public static final SparkMaxConfig feederConfig = new SparkMaxConfig();
 
     static {
       // Configure basic setting of the flywheel motors
