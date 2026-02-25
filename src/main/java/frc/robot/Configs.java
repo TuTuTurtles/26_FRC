@@ -85,7 +85,10 @@ public final class Configs {
 
   public static final class IntakeSubsystem {
     public static final SparkFlexConfig intakeConfig = new SparkFlexConfig();
-    public static final SparkFlexConfig conveyorConfig = new SparkFlexConfig();
+    public static final SparkMaxConfig intakePivotConfig = new SparkMaxConfig();
+
+
+    public static final SparkMaxConfig conveyorConfig = new SparkMaxConfig();
 
     static {
       // Configure basic settings of the intake motor
