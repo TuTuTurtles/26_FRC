@@ -6,10 +6,12 @@ package frc.robot;
 
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.AbsoluteEncoderConfig;
+import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import frc.robot.Constants.IntakeSubsystemConstants;
 import frc.robot.Constants.ModuleConstants;
 
 /**
@@ -24,7 +26,7 @@ public final class Configs {
   private static final double nominalVoltage = 12.0;
 
   public static final class MAXSwerveModule {
-    public static final SparkMaxConfig drivingConfig = new SparkMaxConfig();
+    public static final SparkFlexConfig drivingConfig = new SparkFlexConfig();
     public static final SparkMaxConfig turningConfig = new SparkMaxConfig();
 
     static {
@@ -83,7 +85,8 @@ public final class Configs {
 
   public static final class IntakeSubsystem {
     public static final SparkFlexConfig intakeConfig = new SparkFlexConfig();
-    public static final SparkFlexConfig conveyorConfig = new SparkFlexConfig();
+    public static final SparkMaxConfig conveyorConfig = new SparkMaxConfig();
+    public static final SparkMaxConfig intakePivotConfig = new SparkMaxConfig();
 
     static {
       // Configure basic settings of the intake motor
@@ -92,6 +95,21 @@ public final class Configs {
         .idleMode(IdleMode.kCoast)
         .openLoopRampRate(0.5)
         .smartCurrentLimit(40);
+
+          intakePivotConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
+      intakePivotConfig
+          .encoder
+          .positionConversionFactor(
+              IntakeSubsystemConstants.kPivotGearRatio * 360.0) // Degrees with 0 as the horizonatal
+          .velocityConversionFactor(
+              (IntakeSubsystemConstants.kPivotGearRatio * 360.0) / 60); // Degrees per second
+      intakePivotConfig
+          .closedLoop
+          .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+          .p(0.01)
+          .feedForward
+          .kCosRatio(1.0 / 360.0)
+          .kCos(0.00277777777);
 
       // Configure basic settings of the conveyor motor
       conveyorConfig
@@ -105,7 +123,7 @@ public final class Configs {
   public static final class ShooterSubsystem {
     public static final SparkFlexConfig flywheelConfig = new SparkFlexConfig();
     public static final SparkFlexConfig flywheelFollowerConfig = new SparkFlexConfig();
-    public static final SparkFlexConfig feederConfig = new SparkFlexConfig();
+    public static final SparkMaxConfig feederConfig = new SparkMaxConfig();
 
     static {
       // Configure basic setting of the flywheel motors

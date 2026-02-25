@@ -21,11 +21,20 @@ public final class Constants {
 
   public static final class IntakeSubsystemConstants {
     public static final int kIntakeMotorCanId = 2;    // SPARK Flex CAN ID
+    public static final int kIntakePivotMotorCanId = 3;
     public static final int kConveyorMotorCanId = 4;  // SPARK Flex CAN ID
+
+    public static final double kPivotGearRatio = 47.5;
 
     public static final class IntakeSetpoints {
       public static final double kIntake = 0.6;
       public static final double kExtake = -0.6;
+    }
+
+    public static final class PivotSetpoints {
+      public static final double kStow = 90.0;
+      public static final double kIntake = 0.0;
+      public static final double kExtake = 0.0;
     }
 
     public static final class ConveyorSetpoints {
@@ -97,7 +106,7 @@ public final class Constants {
     // The MAXSwerve module can be configured with one of three pinion gears: 12T,
     // 13T, or 14T. This changes the drive speed of the module (a pinion gear with
     // more teeth will result in a robot that drives faster).
-    public static final int kDrivingMotorPinionTeeth = 14;
+    public static final int kDrivingMotorPinionTeeth = 13;
 
     // Calculations required for driving motor conversion factors and feed forward
     public static final double kDrivingMotorFreeSpeedRps = NeoMotorConstants.kFreeSpeedRpm / 60;

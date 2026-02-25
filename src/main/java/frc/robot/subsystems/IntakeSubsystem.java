@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -16,15 +18,23 @@ import frc.robot.Configs;
 import frc.robot.Constants.IntakeSubsystemConstants;
 import frc.robot.Constants.IntakeSubsystemConstants.ConveyorSetpoints;
 import frc.robot.Constants.IntakeSubsystemConstants.IntakeSetpoints;
+import frc.robot.Constants.IntakeSubsystemConstants.PivotSetpoints;
 
 public class IntakeSubsystem extends SubsystemBase {
   // Initialize intake SPARK. We will use open loop control for this.
   private SparkFlex intakeMotor =
       new SparkFlex(IntakeSubsystemConstants.kIntakeMotorCanId, MotorType.kBrushless);
 
+    private SparkFlex intakePivotMotor =
+        new SparkFlex(IntakeSubsystemConstants.kIntakePivotMotorCanId, MotorType.kBrushless);
+    private SparkClosedLoopController intakePivotController = 
+      intakePivotMotor.getClosedLoopController();
+
   // Initialize conveyor SPARK. We will use open loop control for this.
   private SparkFlex conveyorMotor =
       new SparkFlex(IntakeSubsystemConstants.kConveyorMotorCanId, MotorType.kBrushless);
+
+    private boolean isPivotDeployed = true;
 
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
@@ -42,6 +52,11 @@ public class IntakeSubsystem extends SubsystemBase {
         Configs.IntakeSubsystem.intakeConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
+
+    intakePivotMotor.configure(
+      Configs.IntakeSubsystem.intakePivotConfig,
+      ResetMode.kResetSafeParameters,
+      PersistMode.kPersistParameters);
 
     conveyorMotor.configure(
       Configs.IntakeSubsystem.conveyorConfig,
@@ -90,6 +105,19 @@ public class IntakeSubsystem extends SubsystemBase {
           this.setConveyorPower(0.0);
         }).withName("Extaking");
   }
+  public Command togglePivotCommand() {
+    return this.runOnce(
+        () -> {
+          if (isPivotDeployed) {
+            this.intakePivotController.setSetpoint(PivotSetpoints.kIntake, ControlType.kPosition);
+            isPivotDeployed = false;
+          } else {
+            this.intakePivotController.setSetpoint(PivotSetpoints.kStow, ControlType.kPosition);
+            isPivotDeployed = true;
+          }
+        });
+  }
+  
 
   @Override
   public void periodic() {
