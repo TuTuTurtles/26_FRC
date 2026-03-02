@@ -136,4 +136,13 @@ public final class Constants {
             kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
   }
 
+  public static final class PathPlannerConstants {
+    public static final double kTranslationP = 5.0;
+    public static final double kRotationP = 5.0;
+
+    private PathPlannerConstants() {
+      throw new UnsupportedOperationException("This is a utility class!");
+    }
+  }
+
 }
