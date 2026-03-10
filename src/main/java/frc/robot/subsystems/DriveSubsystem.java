@@ -4,6 +4,11 @@
 
 package frc.robot.subsystems;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -13,9 +18,11 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.PathPlannerConstants;
 
 public class DriveSubsystem extends SubsystemBase {
   // Create MAXSwerveModules
@@ -55,7 +62,26 @@ private final MAXSwerveModule m_rearRight = new MAXSwerveModule(
           });
 
   /** Creates a new DriveSubsystem. */
-  public DriveSubsystem() {}
+  public DriveSubsystem() {
+    try {
+      RobotConfig pathPlannerRobotConfig = RobotConfig.fromGUISettings();
+
+      AutoBuilder.configure(
+          this::getPose,
+          this::resetOdometry,
+          this::getRobotRelativeSpeeds,
+          (speeds, feedforwards) -> driveRobotRelative(speeds),
+          new PPHolonomicDriveController(
+              new PIDConstants(PathPlannerConstants.kTranslationP, 0.0, 0.0),
+              new PIDConstants(PathPlannerConstants.kRotationP, 0.0, 0.0)),
+          pathPlannerRobotConfig,
+          () -> DriverStation.getAlliance().isPresent()
+              && DriverStation.getAlliance().get() == DriverStation.Alliance.Red,
+          this);
+    } catch (Exception e) {
+      DriverStation.reportError("Failed to configure PathPlanner AutoBuilder", e.getStackTrace());
+    }
+  }
 
   @Override
   public void periodic() {
@@ -150,6 +176,20 @@ private final MAXSwerveModule m_rearRight = new MAXSwerveModule(
     m_frontRight.setDesiredState(desiredStates[1]);
     m_rearLeft.setDesiredState(desiredStates[2]);
     m_rearRight.setDesiredState(desiredStates[3]);
+  }
+
+  /** Returns the current robot-relative chassis speeds. */
+  public ChassisSpeeds getRobotRelativeSpeeds() {
+    return DriveConstants.kDriveKinematics.toChassisSpeeds(
+        m_frontLeft.getState(),
+        m_frontRight.getState(),
+        m_rearLeft.getState(),
+        m_rearRight.getState());
+  }
+
+  /** Drives the robot from robot-relative chassis speeds. */
+  public void driveRobotRelative(ChassisSpeeds chassisSpeeds) {
+    setModuleStates(DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds));
   }
 
   /** Resets the drive encoders to currently read a position of 0. */
