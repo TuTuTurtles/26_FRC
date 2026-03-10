@@ -86,9 +86,11 @@ public final class Configs {
   public static final class IntakeSubsystem {
     public static final SparkFlexConfig intakeConfig = new SparkFlexConfig();
     public static final SparkMaxConfig intakePivotConfig = new SparkMaxConfig();
-
-
+    public static final SparkMaxConfig rightClimberConfig = new SparkMaxConfig();
+    public static final SparkMaxConfig leftClimberConfig = new SparkMaxConfig();
     public static final SparkMaxConfig conveyorConfig = new SparkMaxConfig();
+
+
 
     static {
       // Configure basic settings of the intake motor
@@ -97,6 +99,16 @@ public final class Configs {
         .idleMode(IdleMode.kCoast)
         .openLoopRampRate(0.5)
         .smartCurrentLimit(40);
+
+      rightClimberConfig
+        .inverted(false)
+        .idleMode(IdleMode.kCoast)
+        .openLoopRampRate(0.5)
+        .smartCurrentLimit(40);
+
+      leftClimberConfig
+        .follow(Constants.DriveConstants.kRightClimberCanId, true);
+
 
           intakePivotConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
       intakePivotConfig

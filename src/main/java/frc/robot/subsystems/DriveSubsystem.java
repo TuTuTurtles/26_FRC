@@ -46,7 +46,7 @@ private final MAXSwerveModule m_rearRight = new MAXSwerveModule(
   SwerveDriveOdometry m_odometry =
       new SwerveDriveOdometry(
           DriveConstants.kDriveKinematics,
-          Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kY)),
+          Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
           new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -61,7 +61,7 @@ private final MAXSwerveModule m_rearRight = new MAXSwerveModule(
   public void periodic() {
     // Update the odometry in the periodic block
     m_odometry.update(
-        Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kY)),
+        Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
         new SwerveModulePosition[] {
           m_frontLeft.getPosition(),
           m_frontRight.getPosition(),
@@ -86,7 +86,7 @@ private final MAXSwerveModule m_rearRight = new MAXSwerveModule(
    */
   public void resetOdometry(Pose2d pose) {
     m_odometry.resetPosition(
-        Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kY)),
+        Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
         new SwerveModulePosition[] {
           m_frontLeft.getPosition(),
           m_frontRight.getPosition(),
@@ -117,7 +117,7 @@ private final MAXSwerveModule m_rearRight = new MAXSwerveModule(
                     xSpeedDelivered,
                     ySpeedDelivered,
                     rotDelivered,
-                    Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kY)))
+                    Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)))
                 : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
     SwerveDriveKinematics.desaturateWheelSpeeds(
         swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
@@ -160,10 +160,15 @@ private final MAXSwerveModule m_rearRight = new MAXSwerveModule(
     m_rearRight.resetEncoders();
   }
 
-  /** Zeroes the heading of the robot. */
-  public Command zeroHeadingCommand() {
-    return this.runOnce(() -> m_gyro.reset());
+  public void zeroHeading(){
+m_gyro.reset();
+
   }
+
+  /** Zeroes the heading of the robot. */
+  //public Command zeroHeadingCommand() {
+    //return this.runOnce(() -> m_gyro.reset());
+  //}
 
   /**
    * Returns the heading of the robot.
@@ -171,8 +176,10 @@ private final MAXSwerveModule m_rearRight = new MAXSwerveModule(
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    return Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kY)).getDegrees();
+    return Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)).getDegrees();
+    
   }
+  
 
   /**
    * Returns the turn rate of the robot.
@@ -180,6 +187,6 @@ private final MAXSwerveModule m_rearRight = new MAXSwerveModule(
    * @return The turn rate of the robot, in degrees per second
    */
   public double getTurnRate() {
-    return m_gyro.getRate(IMUAxis.kY) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
+    return m_gyro.getRate(IMUAxis.kZ) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
   }
 }

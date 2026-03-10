@@ -4,17 +4,20 @@
 
 package frc.robot.subsystems;
 
+import java.time.format.ResolverStyle;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-
+import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IntakeSubsystemConstants;
 import frc.robot.Constants.IntakeSubsystemConstants.ConveyorSetpoints;
 import frc.robot.Constants.IntakeSubsystemConstants.IntakeSetpoints;
@@ -25,14 +28,22 @@ public class IntakeSubsystem extends SubsystemBase {
   private SparkFlex intakeMotor =
       new SparkFlex(IntakeSubsystemConstants.kIntakeMotorCanId, MotorType.kBrushless);
 
-    private SparkFlex intakePivotMotor =
-        new SparkFlex(IntakeSubsystemConstants.kIntakePivotMotorCanId, MotorType.kBrushless);
-    private SparkClosedLoopController intakePivotController = 
-      intakePivotMotor.getClosedLoopController();
+    private SparkMax intakePivotMotor =
+        new SparkMax(IntakeSubsystemConstants.kIntakePivotMotorCanId, MotorType.kBrushless);
+    //private SparkClosedLoopController intakePivotController = 
+      //intakePivotMotor.getClosedLoopController();
+
+    private SparkMax rightCLimber = 
+      new SparkMax(DriveConstants.kRightClimberCanId, MotorType.kBrushless); 
+
+    private SparkMax leftClimber =
+      new SparkMax(DriveConstants.kLeftClimberCanId, MotorType.kBrushless);
+
+    
 
   // Initialize conveyor SPARK. We will use open loop control for this.
-  private SparkFlex conveyorMotor =
-      new SparkFlex(IntakeSubsystemConstants.kConveyorMotorCanId, MotorType.kBrushless);
+  private SparkMax conveyorMotor =
+      new SparkMax(IntakeSubsystemConstants.kConveyorMotorCanId, MotorType.kBrushless);
 
     private boolean isPivotDeployed = true;
 
@@ -53,10 +64,22 @@ public class IntakeSubsystem extends SubsystemBase {
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 
-    intakePivotMotor.configure(
-      Configs.IntakeSubsystem.intakePivotConfig,
-      ResetMode.kResetSafeParameters,
-      PersistMode.kPersistParameters);
+    //intakePivotMotor.configure(
+     // Configs.IntakeSubsystem.intakePivotConfig,
+     // ResetMode.kResetSafeParameters,
+     // PersistMode.kPersistParameters);
+
+   // rightCLimber.configure(
+     // Configs.IntakeSubsystem.rightClimberConfig,
+     // ResetMode.kResetSafeParameters,
+     // PersistMode.kPersistParameters);
+
+   // leftClimber.configure(
+      //Configs.IntakeSubsystem.leftClimberConfig,
+     // ResetMode.kResetSafeParameters,
+      //PersistMode.kPersistParameters);
+    
+    
 
     conveyorMotor.configure(
       Configs.IntakeSubsystem.conveyorConfig,
@@ -91,6 +114,17 @@ public class IntakeSubsystem extends SubsystemBase {
         }).withName("Intaking");
   }
 
+  public Command stopIntakeCommand() {
+    return this.startEnd(
+        () -> {
+          this.setIntakePower(0.0);
+          this.setConveyorPower(0.0);
+        }, () -> {
+          this.setIntakePower(0.0);
+          this.setConveyorPower(0.0);
+        }).withName("Intaking");
+  }
+
   /**
    * Command to reverse the intake motor and coveyor motors. When the command is interrupted, e.g. the button is
    * released, the motors will stop.
@@ -105,18 +139,36 @@ public class IntakeSubsystem extends SubsystemBase {
           this.setConveyorPower(0.0);
         }).withName("Extaking");
   }
-  public Command togglePivotCommand() {
-    return this.runOnce(
+
+  public Command stopExtakeCommand() {
+    return this.startEnd(
         () -> {
-          if (isPivotDeployed) {
-            this.intakePivotController.setSetpoint(PivotSetpoints.kIntake, ControlType.kPosition);
-            isPivotDeployed = false;
-          } else {
-            this.intakePivotController.setSetpoint(PivotSetpoints.kStow, ControlType.kPosition);
-            isPivotDeployed = true;
-          }
-        });
+          this.setIntakePower(0.0);
+          this.setConveyorPower(0.0);
+        }, () -> {
+          this.setIntakePower(0.0);
+          this.setConveyorPower(0.0);
+        }).withName("Extaking");
   }
+  public void intakeDown(double speed){
+    intakePivotMotor.set(speed);
+  }
+
+  public void climb(double speed){
+    rightCLimber.set(speed);
+  }
+ // public Command togglePivotCommand() {
+    //return this.runOnce(
+       // () -> {
+         // if (isPivotDeployed) {
+          //  this.intakePivotController.setSetpoint(PivotSetpoints.kIntake, ControlType.kPosition);
+           // isPivotDeployed = false;
+         // } else {
+          //  this.intakePivotController.setSetpoint(PivotSetpoints.kStow, ControlType.kPosition);
+          //  isPivotDeployed = true;
+         // }
+       // });
+  //}
   
 
   @Override

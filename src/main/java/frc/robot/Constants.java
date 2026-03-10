@@ -27,8 +27,8 @@ public final class Constants {
     public static final double kPivotGearRatio = 47.5;
 
     public static final class IntakeSetpoints {
-      public static final double kIntake = 0.6;
-      public static final double kExtake = -0.6;
+      public static final double kIntake = 0.5;
+      public static final double kExtake = -0.5;
     }
 
     public static final class PivotSetpoints {
@@ -53,8 +53,8 @@ public final class Constants {
     }
 
     public static final class FlywheelSetpoints {
-      public static final double kShootRpm = 5000;
-      public static final double kVelocityTolerance = 100;
+      public static final double kShootRpm = 350;
+      public static final double kVelocityTolerance = 50;
     }
   }
 
@@ -66,9 +66,9 @@ public final class Constants {
 
     // Chassis configuration
     // Distance between centers of right and left wheels on robot
-    public static final double kTrackWidth = Units.inchesToMeters(23.0);
+    public static final double kTrackWidth = Units.inchesToMeters(23.5);
     // Distance between front and back wheels on robot
-    public static final double kWheelBase = Units.inchesToMeters(23.0);
+    public static final double kWheelBase = Units.inchesToMeters(23.5);
 
     public static final SwerveDriveKinematics kDriveKinematics =
         new SwerveDriveKinematics(
@@ -93,6 +93,9 @@ public final class Constants {
     public static final int kRearLeftTurningCanId = 12;
     public static final int kFrontRightTurningCanId = 10;
     public static final int kRearRightTurningCanId = 8;
+
+    public static final int kRightClimberCanId = 20;
+    public static final int kLeftClimberCanId = 21;
 
     public static final boolean kGyroReversed = false;
   }
@@ -125,6 +128,9 @@ public final class Constants {
 
   public static final class OIConstants {
     public static final int kDriverControllerPort = 0;
+    public static final int kBluePort = 1;
+    public static final int kRedPort = 2;
+    public static final int kDebugControllerPort = 3;
     public static final double kDriveDeadband = 0.1;
     public static final double kTriggerButtonThreshold = 0.2;
   }

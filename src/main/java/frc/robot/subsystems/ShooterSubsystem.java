@@ -11,7 +11,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-
+import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,8 +36,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
   // Initialize feeder SPARK. We will use open loop control for this so we don't need a closed loop
   // controller like above.
-  private SparkFlex feederMotor =
-      new SparkFlex(ShooterSubsystemConstants.kFeederMotorCanId, MotorType.kBrushless);
+  private SparkMax feederMotor =
+      new SparkMax(ShooterSubsystemConstants.kFeederMotorCanId, MotorType.kBrushless);
 
   // Member variables for subsystem state management
   private double flywheelTargetVelocity = 0.0;
@@ -82,11 +82,11 @@ public class ShooterSubsystem extends SubsystemBase {
    * Trigger: Is the flywheel spinning at the required velocity?
    */
   public final Trigger isFlywheelSpinning = new Trigger(
-      () -> isFlywheelAt(5000) || flywheelEncoder.getVelocity() > 5000
+      () -> isFlywheelAt(400) || flywheelEncoder.getVelocity() > 400
   );
 
   public final Trigger isFlywheelSpinningBackwards = new Trigger(
-      () -> isFlywheelAt(-5000) || flywheelEncoder.getVelocity() < -5000
+      () -> isFlywheelAt(-400) || flywheelEncoder.getVelocity() < -400
   );
 
   /** 
@@ -156,6 +156,22 @@ public class ShooterSubsystem extends SubsystemBase {
           feederMotor.stopMotor();
         })
     ).withName("Shooting");
+  }
+
+    public Command stopShooterCommand() {
+    return this.startEnd(
+      () -> this.setFlywheelVelocity(0.0),
+      () -> flywheelMotor.stopMotor()
+    ).until(isFlywheelSpinning).andThen(
+      this.startEnd(
+        () -> {
+          this.setFlywheelVelocity(0.0);
+          this.setFeederPower(0.0);
+        }, () -> {
+          flywheelMotor.stopMotor();
+          feederMotor.stopMotor();
+        })
+    ).withName("NotShooting");
   }
 
   @Override

@@ -5,11 +5,15 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.Autos;
 import frc.robot.Constants.OIConstants;
@@ -31,8 +35,16 @@ public class RobotContainer {
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
 
   // The driver's controller
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OIConstants.kDriverControllerPort);
+  private final CommandXboxController m_DebugController =
+      new CommandXboxController(OIConstants.kDebugControllerPort);
+
+  private final Joystick m_driverController = new Joystick(OIConstants.kDriverControllerPort);
+
+  private final Joystick m_BlueButtons = new Joystick(OIConstants.kBluePort);
+
+  private final Joystick m_RedButtons = new Joystick(OIConstants.kRedPort);
+
+
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -47,11 +59,11 @@ public class RobotContainer {
             () ->
                 m_robotDrive.drive(
                     -MathUtil.applyDeadband(
-                        m_driverController.getLeftY(), OIConstants.kDriveDeadband),
+                        m_driverController.getY(), OIConstants.kDriveDeadband),
                     -MathUtil.applyDeadband(
-                        m_driverController.getLeftX(), OIConstants.kDriveDeadband),
+                        m_driverController.getX(), OIConstants.kDriveDeadband),
                     -MathUtil.applyDeadband(
-                        m_driverController.getRightX(), OIConstants.kDriveDeadband),
+                        m_driverController.getZ(), OIConstants.kDriveDeadband),
                     true),
             m_robotDrive).withName("Robot Drive Default"));
 
@@ -60,11 +72,14 @@ public class RobotContainer {
 
     SmartDashboard.putNumber("Bat Voltage", RobotController.getBatteryVoltage());
 
+   
+
     SmartDashboard.putData("Intake", m_intake.runIntakeCommand().withName("Intake - Intaking"));
     SmartDashboard.putData("Extake", m_intake.runExtakeCommand().withName("Intake - Extaking"));
 
     SmartDashboard.putData("Feeder", m_shooter.runFeederCommand().withName("Shooter - Feeding and Shooting"));
     SmartDashboard.putData("Flywheel", m_shooter.runFlywheelCommand().withName("Shooter - Spinning up Flywheel"));
+    
   }
 
   /**
@@ -78,25 +93,146 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Left Stick Button -> Set swerve to X
-    m_driverController.leftStick().whileTrue(m_robotDrive.setXCommand());
+   // if (m_driverController.getRawButton(0))
+    
+    //{
+     // m_robotDrive.setXCommand();
+    //}
+
 
     // Start Button -> Zero swerve heading
-    m_driverController.start().onTrue(m_robotDrive.zeroHeadingCommand());
+  
+   new JoystickButton(m_RedButtons, 2).whileTrue(m_robotDrive.setXCommand());
+  new JoystickButton(m_BlueButtons, 2).onTrue(new InstantCommand(() -> m_robotDrive.zeroHeading(),m_robotDrive));
+
+
+   new JoystickButton(m_BlueButtons, 7).whileTrue(m_intake.runIntakeCommand());
+
+   new JoystickButton(m_RedButtons, 5).whileTrue(m_intake.runExtakeCommand());
+
+   new JoystickButton(m_BlueButtons, 3).whileTrue( m_intake.run(() -> m_intake.intakeDown(-.2)));
+
+   new JoystickButton(m_BlueButtons, 3).onFalse( m_intake.run(() -> m_intake.intakeDown(0.0)));
+
+   new JoystickButton(m_RedButtons, 3).whileTrue( m_intake.run(() -> m_intake.intakeDown(.2)));
+
+   new JoystickButton(m_RedButtons, 3).onFalse( m_intake.run(() -> m_intake.intakeDown(0.0)));
+
+
+
+   new JoystickButton(m_RedButtons, 1).whileTrue( m_intake.run(() -> m_intake.climb(-.2)));
+
+   new JoystickButton(m_RedButtons, 1).onFalse( m_intake.run(() -> m_intake.climb(0.0)));
+
+   new JoystickButton(m_BlueButtons, 1).whileTrue( m_intake.run(() -> m_intake.climb(.2)));
+
+   new JoystickButton(m_BlueButtons, 1).onFalse( m_intake.run(() -> m_intake.climb(0.0)));
+
+
+   new JoystickButton(m_BlueButtons, 5).toggleOnTrue(m_shooter.runShooterCommand().alongWith(m_intake.runIntakeCommand()));
 
     // Right Trigger -> Run fuel intake in reverse
-    m_driverController
-      .rightTrigger(OIConstants.kTriggerButtonThreshold)
-      .whileTrue(m_intake.runIntakeCommand());
+   //if (m_BlueButtons.getRawButton(6))
+  // {
+    //  m_intake.runIntakeCommand();
+  // }
+
+   //else{
+   // m_intake.stopIntakeCommand();
+  // }
 
     // Left Trigger -> Run fuel intake in reverse
-    m_driverController
-      .leftTrigger(OIConstants.kTriggerButtonThreshold)
-      .whileTrue(m_intake.runExtakeCommand());
+   //if (m_RedButtons.getRawButton(4))
+   //{
+   //m_intake.runExtakeCommand();
+   //}
+
+   //else{
+    //m_intake.stopExtakeCommand();
+   //}
 
     // Y Button -> Run intake and run the shooter flywheel and feeder
-    m_driverController.y().toggleOnTrue(m_shooter.runShooterCommand().alongWith(m_intake.runIntakeCommand()));
+    //boolean toggle = false;
+    //if (m_BlueButtons.getRawButtonPressed(4))
+   // {
+     // if (toggle)
+      //{
+        // m_shooter.runShooterCommand().alongWith(m_intake.runIntakeCommand());
+       //  toggle = false;
+     // }
+     // else
+      //{
+         // m_shooter.stopShooterCommand().alongWith(m_intake.stopIntakeCommand());
+         // toggle = true;
+     // }
+   // }
+    
+    // if (m_RedButtons.getRawButton(2))
+    // {
+        //  m_intake.run(() -> m_intake.intakeDown(-.2));
+     //}
 
-     m_driverController.x().onTrue(m_intake.togglePivotCommand());
+    // else
+     //{
+         // m_intake.run(() -> m_intake.intakeDown(0));
+     //}
+
+     //if (m_BlueButtons.getRawButton(2))
+     //{
+      //m_intake.run(() -> m_intake.intakeDown(.2));
+    // }
+
+     //else
+    // {
+     // m_intake.run(() -> m_intake.intakeDown(0));
+     //}
+
+      
+     
+     
+     
+    // if (m_RedButtons.getRawButton(0))
+    // {
+      //m_intake.run(() -> m_intake.climb(-.2));
+    // }
+
+    // else
+    // {
+     // m_intake.run(() -> m_intake.climb(0));
+     //}
+
+    // if (m_RedButtons.getRawButton(1))
+     //{
+     // m_intake.run(() -> m_intake.climb(.2));
+    // }
+
+    // else
+     //{
+     // m_intake.run(() -> m_intake.climb(0));
+     //}
+    // m_driverController.x().whileTrue(
+     // m_intake.run(() -> m_intake.intakeDown(-.2))
+     // );
+     // m_driverController.x().onFalse(
+      // m_intake.run(() -> m_intake.intakeDown(0)));
+
+      // m_driverController.a().whileTrue(
+     // m_intake.run(() -> m_intake.intakeDown(.2))
+     // );
+     // m_driverController.a().onFalse(
+      // m_intake.run(() -> m_intake.intakeDown(0)));
+
+      //  m_driverController.b().whileTrue(
+     // m_intake.run(() -> m_intake.climb(-.2))
+      //);
+     // m_driverController.b().onFalse(
+      // m_intake.run(() -> m_intake.climb(0)));
+
+     //  m_driverController.back().whileTrue(
+     // m_intake.run(() -> m_intake.climb(.2))
+     // );
+     // m_driverController.back().onFalse(
+      // m_intake.run(() -> m_intake.climb(0)));
   }
 
   /**
